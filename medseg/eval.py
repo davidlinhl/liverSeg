@@ -5,6 +5,7 @@ import nibabel as nib
 from tqdm import tqdm
 from datetime import datetime
 import argparse
+import scipy.ndimage
 
 import utils.util as util
 from utils.config import cfg
@@ -43,8 +44,8 @@ def main():
         "Dice",
         "IOU",
     ]
-    for m in cfg.EVAL.METRICS:
-        if m in metrics:
+    for m in metrics:
+        if m in cfg.EVAL.METRICS:
             headers.append(m)
 
     if not os.path.exists(os.path.dirname(cfg.EVAL.PATH.RESULT)):
@@ -66,7 +67,10 @@ def main():
 
         pred = predf.get_fdata()
         lab = labf.get_fdata()
-        assert pred.shape == lab.shape, "分割结果和GT大小不同： {}，{}".format(preds[ind], labels[ind])
+        if lab.shape[0] != pred.shape[0]:
+            ratio = [a / b for a, b in zip(pred.shape, lab.shape)]
+            lab = scipy.ndimage.interpolation.zoom(lab, ratio, order=1)
+        assert pred.shape == lab.shape, "分割结果和GT大小不同： {}，{}, {}".format(pred.shape, lab.shape, preds[ind])
 
         temp = []
 
@@ -92,7 +96,7 @@ def main():
             temp.append(rec)
 
         if "Sensitivity" in cfg.EVAL.METRICS:
-            rec = metric.binary.recall(pred, lab)
+            rec = metric.binary.sensitivity(pred, lab)  # same as recall
             temp.append(rec)
 
         if "Specificity" in cfg.EVAL.METRICS:
@@ -102,7 +106,7 @@ def main():
         if "Accuracy" in cfg.EVAL.METRICS:
             tp = metric.binary.true_positive_rate(pred, lab)
             tn = metric.binary.true_negative_rate(pred, lab)
-            acc = tp + tn
+            acc = (tp + tn) / 2
             temp.append(acc)
 
         if "Kappa" in cfg.EVAL.METRICS:

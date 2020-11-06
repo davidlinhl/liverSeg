@@ -1,6 +1,7 @@
 # project cache
 lits.csv
 test.py
+*.csv
 
 
 # BOS
