@@ -58,3 +58,5 @@ python tool/infer/aorta.py
 These two scripts combined can calculate aorta diameter and report aorta aneurysm based on it.
 
 We have an [Aistudio](https://aistudio.baidu.com/aistudio/projectdetail/250994) project that have all the data and environment ready.
+
+Should u have any question in using this toolkit, u can contact the developer at linhandev@qq.com
