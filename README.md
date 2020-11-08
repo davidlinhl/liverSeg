@@ -6,4 +6,10 @@ Medical image segmentation toolkit based on PaddlePaddle framework. Our target i
 ## Project Structure
 Currently this project contains only 2D segmentation models. The structure is as follows.
 
-- medseg: contains the 2D and 3D segmentation toolkit
+- medseg: Promary code
+-- train.py: Training pipeline
+-- aug.py: Data augmentation
+-- loss.py: Various model loss
+-- eval.py: Various metrics to evaluate segmentation result
+-- vis.py: Visualize results
+-- models: Currently only 2D models
