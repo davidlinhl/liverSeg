@@ -55,37 +55,85 @@ def filter_largest_volume(label, ratio=1.2, mode="soft"):
 
 labels = []
 
+# TODO: 添加clip到一个前景类型的功能
+def nii2png(scan_path, scan_img_dir, label_path=None, label_img_dir=None, rot=0, wwwc=(400, 0), thresh=None):
+    """将nii格式的扫描转成png.
+    扫描和标签一起处理，支持窗口化，旋转，略过没有前景的片
 
-def nii2png(
-    scan_path, scan_img_dir, label_path=None, label_img_dir=None, rot=1, wwwl=(400, 0), scan_only=False, thresh=None
-):
+    Parameters
+    ----------
+    scan_path : str
+        扫描nii路径.
+    scan_img_dir : str
+        扫描生成png放到这.
+    label_path : str
+        标签nii路径.
+    label_img_dir : str
+        标签生成png放到这.
+    rot : int
+        进行几次旋转，如果有标签会一起.
+    wwwc : list/tuple
+        进行窗口化的窗宽窗位.
+    thresh : int
+        标签中前景数量达到这个数才生成png，否则略过.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
+    """
     scanf = nib.load(scan_path)
     scan_data = scanf.get_fdata()
     name = os.path.basename(scan_path)
+    # print(name)
+    if scan_data.shape[0] == 1024:
+        print("[WARNNING]", name, "is 1024")
+        # vol = scipy.ndimage.interpolation.zoom(vol, [0.5, 0.5, 1], order=1 if islabel else 3)
 
-    # if vol.shape[0] == 1024:
-    #     vol = scipy.ndimage.interpolation.zoom(vol, [0.5, 0.5, 1], order=1 if islabel else 3)
+    if label_path:
+        labelf = nib.load(label_path)
+        label_data = labelf.get_fdata()
+        if label_data.shape != scan_data.shape:
+            print("[ERROR] Scan and image dimension mismatch", name, scan_data.shape, label_data.shape)
 
     for _ in range(rot):
         scan_data = np.rot90(scan_data)
+        if label_path:
+            label_data = np.rot90(label_data)
 
     if not os.path.exists(scan_img_dir):
         os.makedirs(scan_img_dir)
+    if label_path and not os.path.exists(label_img_dir):
+        os.makedirs(label_img_dir)
 
-    wl, wh = (wwwl[1] - wwwl[0] / 2, wwwl[1] + wwwl[0] / 2)
+    wl, wh = (wwwc[1] - wwwc[0] / 2, wwwc[1] + wwwc[0] / 2)
     scan_data = scan_data.astype("float32").clip(wl, wh)
     scan_data = (scan_data - wl) / (wh - wl) * 256
+    scan_data = scan_data.astype("uint8")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
         for ind in range(1, scan_data.shape[2] - 1):
-            # slice = scan_data[:, :, ind - 1 : ind + 2]
-            slice = scan_data[:, :, ind]
+            if label_path:
+                label_slice = label_data[:, :, ind]
+                # 如果进行thresh限制而且这一片不达到这个数，那么就直接跳过，label和scan都不存
+                if thresh and label_slice.sum() < thresh:
+                    continue
+                file_path = os.path.join(label_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind))
+                executor.submit(save_png, label_slice, file_path)
+
+            scan_slice = scan_data[:, :, ind - 1 : ind + 2]
             file_path = os.path.join(scan_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind))
-            executor.submit(save_png, slice, file_path)
+            executor.submit(save_png, scan_slice, file_path)
+            if label_path:
+                label_slice = label_data[:, :, ind]
+                file_path = os.path.join(label_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind))
+                executor.submit(save_png, label_slice, file_path)
+
+    # input("here")
 
 
 def save_png(slice, file_path):
-    # print(file_path)
     cv2.imwrite(file_path, slice)
 
 
@@ -604,7 +652,7 @@ def to_pinyin(name, nonum=False):
         if u"\u4e00" <= ch <= u"\u9fff":
             new_name += pinyin(ch, style=Style.NORMAL)[0][0]
         else:
-            if nonum and ("0" <= ch <= "9" or ch == "_"):
-                continue
+            # if nonum and ("0" <= ch <= "9" or ch == "_"):
+            #     continue
             new_name += ch
     return new_name

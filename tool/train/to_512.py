@@ -36,7 +36,7 @@ def to_512(inf_path):
 
 if __name__ == "__main__":
     names = os.listdir(args.scan_dir)
-    names = [os.path.join(args.scan_dir, n) for n in names if n.endswith("nii")]
+    names = [os.path.join(args.scan_dir, n) for n in names if n.endswith("nii") or n.endswith("nii.gz")]
     print(names)
 
     p = Pool(8)
