@@ -124,7 +124,7 @@ def nii2png(scan_path, scan_img_dir, label_path=None, label_img_dir=None, rot=0,
             if label_path:
                 label_slice = label_data[:, :, ind]
                 # 如果进行thresh限制而且这一片不达到这个数，那么就直接跳过，label和scan都不存
-                if thresh and label_slice.sum() < thresh:
+                if thresh is not None and label_slice.sum() <= thresh:
                     continue
                 file_path = os.path.join(label_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind))
                 executor.submit(save_png, label_slice, file_path)
