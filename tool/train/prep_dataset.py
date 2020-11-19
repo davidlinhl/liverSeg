@@ -15,34 +15,28 @@ from tqdm import tqdm
 import util
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--scan_dir", type=str, default="/home/lin/Desktop/data/aorta/nii/scan")
-parser.add_argument("--scan_img_dir", type=str, default="/home/lin/Desktop/data/aorta/dataset/scan")
-parser.add_argument("--label_dir", type=str, default="/home/lin/Desktop/data/aorta/nii/label")
-parser.add_argument("--label_img_dir", type=str, default="/home/lin/Desktop/data/aorta/dataset/label")
-parser.add_argument("--scan_only", type=bool, default=True)
+parser.add_argument("--scan_dir", type=str, default=None)
+parser.add_argument("--scan_img_dir", type=str, default=None)
+parser.add_argument("--label_dir", type=str, default=None)
+parser.add_argument("--label_img_dir", type=str, default=None)
 parser.add_argument("--thresh", type=int, default=None)
 
 args = parser.parse_args()
 # util.check_nii_match(args.scan_dir, args.label_dir)
 # TODO: 添加logging
+if not args.scan_dir or not args.scan_img_dir:
+    print("[ERROR]: Must at least specify scan input and output dir")
+    exit()
+
 pbar = tqdm(os.listdir(args.scan_dir))
 for file in pbar:
     pbar.set_description("Processing {}".format(file))
-    if args.scan_only:
-        util.nii2png(
-            os.path.join(args.scan_dir, file),
-            args.scan_img_dir,
-            rot=1,
-            wwwc=(400, 0),
-            thresh=args.thresh,
-        )
-    else:
-        util.nii2png(
-            os.path.join(args.scan_dir, file),
-            args.scan_img_dir,
-            os.path.join(args.label_dir, file),
-            args.label_img_dir,
-            rot=1,
-            wwwc=(400, 0),
-            thresh=args.thresh,
-        )
+    util.nii2png(
+        os.path.join(args.scan_dir, file),
+        args.scan_img_dir,
+        os.path.join(args.label_dir, file) if args.label_dir else None,
+        args.label_img_dir,
+        rot=1,
+        wwwc=(400, 0),
+        thresh=args.thresh,
+    )
