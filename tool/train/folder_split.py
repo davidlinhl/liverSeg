@@ -1,7 +1,5 @@
 # 原来的数据和标签分别在一个目录里，进行随机split之后按照pdseg的目录结构放
 import os
-import shutil
-import random
 import argparse
 
 # shutil.move("/home/lin/Desktop/a/test", "/home/lin/Desktop/b")  # 递归移动
