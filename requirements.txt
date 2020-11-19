@@ -4,3 +4,5 @@ tqdm
 numpy
 visualdl
 medpy
+pypinyin
+trimesh
