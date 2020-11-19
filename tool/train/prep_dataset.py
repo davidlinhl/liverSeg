@@ -20,6 +20,7 @@ parser.add_argument("--scan_img_dir", type=str, default="/home/lin/Desktop/data/
 parser.add_argument("--label_dir", type=str, default="/home/lin/Desktop/data/aorta/nii/label")
 parser.add_argument("--label_img_dir", type=str, default="/home/lin/Desktop/data/aorta/dataset/label")
 parser.add_argument("--scan_only", type=bool, default=True)
+parser.add_argument("--thresh", type=int, default=None)
 
 args = parser.parse_args()
 # util.check_nii_match(args.scan_dir, args.label_dir)
@@ -33,6 +34,7 @@ for file in pbar:
             args.scan_img_dir,
             rot=1,
             wwwc=(400, 0),
+            thresh=args.thresh,
         )
     else:
         util.nii2png(
@@ -42,4 +44,5 @@ for file in pbar:
             args.label_img_dir,
             rot=1,
             wwwc=(400, 0),
+            thresh=args.thresh,
         )
