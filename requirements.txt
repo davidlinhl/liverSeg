@@ -6,3 +6,4 @@ visualdl
 medpy
 pypinyin
 trimesh
+SimpleITK

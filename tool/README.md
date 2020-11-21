@@ -15,6 +15,7 @@ echo -e "\n"
 echo -e "\n"
 done
 ```
+train目录下的 mhd2nii.py 可以将一个目录下的mhd格式扫描转换成nii。
 
 # 数据标注
 标注数据的时候ITK-snap用起来很方便，用好命令行参数可以自动进行文件打开，节省时间。
@@ -80,6 +81,4 @@ kill -9 $pid4
 kill -9 $pid6
 kill -9 $pid8
 done
-
-
 ```
