@@ -1,37 +1,24 @@
 # 将mhd的扫描转换为nii格式
-import util
 import os
+import argparse
 
 import SimpleITK as sitk
-import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 from tqdm import tqdm
 
-scan_dir = "/home/aistudio/sliver/scan"
-label_dir = "/home/aistudio/sliver/label"
+parser = argparse.ArgumentParser()
+parser.add_argument("--mhd_dir", type=str, required=True)
+parser.add_argument("--nii_dir", type=str, required=True)
+args = parser.parse_args()
 
-scan_out = "/home/aistudio/data/scan_temp"
-label_out = "/home/aistudio/data/label_temp"
 
-
-for fname in tqdm(util.listdir(scan_dir)):
-    if fname.endswith(".raw"):
+for fname in tqdm(os.listdir(args.mhd_dir)):
+    if not fname.endswith(".mhd"):
         continue
-    scan = sitk.GetArrayFromImage(sitk.ReadImage(os.path.join(scan_dir, fname)))
-    label = sitk.GetArrayFromImage(sitk.ReadImage(os.path.join(label_dir, fname.replace("orig", "seg"))))
-
+    scan = sitk.GetArrayFromImage(sitk.ReadImage(os.path.join(args.mhd_dir, fname)))
     scan = scan.swapaxes(0, 1).swapaxes(1, 2)
-    label = label.swapaxes(0, 1).swapaxes(1, 2)
 
-    # label *= 255
-    # plt.imshow(label[:, :, 100])
-    # plt.show()
-    # plt.imshow(scan[:, :, 100])
-    # plt.show()
-
+    # TODO: 研究mhd/raw格式是否带有更多头文件信息
     new_scan = nib.Nifti1Image(scan, np.eye(4))
-    new_label = nib.Nifti1Image(label, np.eye(4))
-
-    nib.save(new_scan, os.path.join(scan_out, fname.replace("mhd", "nii").replace("liver-orig", "sliver")))
-    nib.save(new_label, os.path.join(label_out, fname.replace("mhd", "nii").replace("liver-orig", "sliver")))
+    nib.save(new_scan, os.path.join(args.nii_dir, fname.replace("mhd", "nii")))
