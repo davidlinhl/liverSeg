@@ -16,9 +16,9 @@ import util
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--scan_dir", type=str, default="/home/lin/Desktop/data/aorta/nii/scan")
-parser.add_argument("--seg_dir", type=str, default="./seg")
-parser.add_argument("--png_dir", type=str, default="./img")
+parser.add_argument("--scan_dir", type=str, required=True)
+parser.add_argument("--seg_dir", type=str, required=True, default="./seg")
+parser.add_argument("--png_dir", type=str, required=True, default="./img")
 parser.add_argument("--filter", type=bool, default=False)
 args = parser.parse_args()
 
@@ -41,6 +41,7 @@ def main():
     for n in nii_names:
         if n not in patient_names:
             print(n, "dont have mask")
+    print(patient_names)
     input("Press enter to continue")
 
     pbar = tqdm(patient_names)

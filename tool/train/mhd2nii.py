@@ -27,4 +27,4 @@ for fname in tqdm(os.listdir(args.mhd_dir)):
 
     # TODO: 研究mhd/raw格式是否带有更多头文件信息
     new_scan = nib.Nifti1Image(scan, np.eye(4))
-    nib.save(new_scan, os.path.join(args.nii_dir, fname.replace("mhd", "nii")))
+    nib.save(new_scan, os.path.join(args.nii_dir, fname.replace("mhd", "nii.gz")))

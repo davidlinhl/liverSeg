@@ -27,7 +27,7 @@ args = parser.parse_args()
 # util.check_nii_match(args.scan_dir, args.label_dir)
 
 # TODO: 添加logging
-pbar = tqdm(os.listdir(args.scan_dir)[:5])
+pbar = tqdm(os.listdir(args.scan_dir))
 for file in pbar:
     pbar.set_description("Processing {}".format(file))
     util.nii2png(
