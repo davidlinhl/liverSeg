@@ -17,6 +17,27 @@ from pypinyin import pinyin, Style
 logging.basicConfig(level=logging.NOTSET)
 
 
+def listdir(path):
+    """展示一个路径下所有文件，排序并去除常见辅助文件.
+
+    Parameters
+    ----------
+    path : type
+        Description of parameter `path`.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
+    """
+    dirs = os.listdir(path)
+    if ".DS_Store" in dirs:
+        dirs.remove(".DS_Store")
+    dirs.sort()  # 通过一样的sort保持vol和seg的对应
+    return dirs
+
+
 def filter_largest_volume(label, ratio=1.2, mode="soft"):
     """对输入的一个3D标签进行处理，只保留其中最大的连通块
 
@@ -56,7 +77,15 @@ def filter_largest_volume(label, ratio=1.2, mode="soft"):
 labels = []
 
 # TODO: 添加clip到一个前景类型的功能
-def nii2png(scan_path, scan_img_dir, label_path=None, label_img_dir=None, rot=0, wwwc=(400, 0), thresh=None):
+def nii2png(
+    scan_path,
+    scan_img_dir,
+    label_path=None,
+    label_img_dir=None,
+    rot=0,
+    wwwc=(400, 0),
+    thresh=None,
+):
     """将nii格式的扫描转成png.
     扫描和标签一起处理，支持窗口化，旋转，略过没有前景的片
 
@@ -102,7 +131,12 @@ def nii2png(scan_path, scan_img_dir, label_path=None, label_img_dir=None, rot=0,
             label_data = np.swapaxes(label_data, 0, 2)
         # TODO: assert
         if label_data.shape != scan_data.shape:
-            print("[ERROR] Scan and image dimension mismatch", name, scan_data.shape, label_data.shape)
+            print(
+                "[ERROR] Scan and image dimension mismatch",
+                name,
+                scan_data.shape,
+                label_data.shape,
+            )
 
     for _ in range(rot):
         scan_data = np.rot90(scan_data)
@@ -119,22 +153,32 @@ def nii2png(scan_path, scan_img_dir, label_path=None, label_img_dir=None, rot=0,
     scan_data = (scan_data - wl) / (wh - wl) * 256
     scan_data = scan_data.astype("uint8")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=multiprocessing.cpu_count()
+    ) as executor:
         for ind in range(1, scan_data.shape[2] - 1):
             if label_path:
                 label_slice = label_data[:, :, ind]
                 # 如果进行thresh限制而且这一片不达到这个数，那么就直接跳过，label和scan都不存
                 if thresh is not None and label_slice.sum() <= thresh:
                     continue
-                file_path = os.path.join(label_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind))
+                file_path = os.path.join(
+                    label_img_dir,
+                    "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind),
+                )
                 executor.submit(save_png, label_slice, file_path)
 
             scan_slice = scan_data[:, :, ind - 1 : ind + 2]
-            file_path = os.path.join(scan_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind))
+            file_path = os.path.join(
+                scan_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind)
+            )
             executor.submit(save_png, scan_slice, file_path)
             if label_path:
                 label_slice = label_data[:, :, ind]
-                file_path = os.path.join(label_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind))
+                file_path = os.path.join(
+                    label_img_dir,
+                    "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind),
+                )
                 executor.submit(save_png, label_slice, file_path)
 
     # input("here")
@@ -164,7 +208,9 @@ def nii2png_single(nii_path, png_folder, rot=1, wwwl=(256, 0), islabel=False, th
     nii_name = os.path.basename(nii_path)
     vol = volf.get_fdata()
     if vol.shape[0] == 1024:
-        vol = scipy.ndimage.interpolation.zoom(vol, [0.5, 0.5, 1], order=1 if islabel else 3)
+        vol = scipy.ndimage.interpolation.zoom(
+            vol, [0.5, 0.5, 1], order=1 if islabel else 3
+        )
     for _ in range(rot):
         vol = np.rot90(vol)
     if not islabel:
@@ -188,7 +234,9 @@ def nii2png_single(nii_path, png_folder, rot=1, wwwl=(256, 0), islabel=False, th
                 continue
             slice[slice == 2] = 1
 
-        file_path = os.path.join(png_folder, "{}-{}.png".format(nii_name.rstrip(".gz").rstrip(".nii"), ind))
+        file_path = os.path.join(
+            png_folder, "{}-{}.png".format(nii_name.rstrip(".gz").rstrip(".nii"), ind)
+        )
         # if not islabel:
         #     if "{}-{}.png".format(nii_name.rstrip(".gz").rstrip(".nii"), ind) not in labels:
         #         print("{}-{}.png".format(nii_name.rstrip(".gz").rstrip(".nii"), ind))
@@ -197,7 +245,15 @@ def nii2png_single(nii_path, png_folder, rot=1, wwwl=(256, 0), islabel=False, th
         cv2.imwrite(file_path, slice)
 
 
-def nii2png_folder(nii_folder, png_folder, rot=1, wwwl=(400, 0), subfolder=False, islabel=False, thresh=0):
+def nii2png_folder(
+    nii_folder,
+    png_folder,
+    rot=1,
+    wwwl=(400, 0),
+    subfolder=False,
+    islabel=False,
+    thresh=0,
+):
     """将一个文件夹里所有的nii转换成png.
 
     Parameters
@@ -219,9 +275,23 @@ def nii2png_folder(nii_folder, png_folder, rot=1, wwwl=(400, 0), subfolder=False
         if subfolder:
             png_folder = os.path.join(png_folder, nii_name)
         if len(nii_name) > 12:
-            nii2png_single(os.path.join(nii_folder, nii_name), png_folder, 1, wwwl, islabel, thresh=thresh)
+            nii2png_single(
+                os.path.join(nii_folder, nii_name),
+                png_folder,
+                1,
+                wwwl,
+                islabel,
+                thresh=thresh,
+            )
         else:
-            nii2png_single(os.path.join(nii_folder, nii_name), png_folder, 3, wwwl, islabel, thresh=thresh)
+            nii2png_single(
+                os.path.join(nii_folder, nii_name),
+                png_folder,
+                3,
+                wwwl,
+                islabel,
+                thresh=thresh,
+            )
         # print(len(nii_name))
         # print(nii_name)
         # input("here")
@@ -255,7 +325,11 @@ def check_nii_match(scan_dir, label_dir, remove=False):
     label_names = [n.rstrip(".gz").rstrip(".nii") for n in labels]
 
     if len(scans) != len(labels):
-        logging.error("Number of scnas({}) and labels ({}) don't match".format(len(scans), len(labels)))
+        logging.error(
+            "Number of scnas({}) and labels ({}) don't match".format(
+                len(scans), len(labels)
+            )
+        )
         pass_check = False
     else:
         logging.info("Pass file number check")
@@ -291,9 +365,13 @@ def check_nii_match(scan_dir, label_dir, remove=False):
         scanf = nib.load(os.path.join(scan_dir, scan_name))
         labelf = nib.load(os.path.join(label_dir, scan_name))
         if (scanf.affine == np.eye(4)).all():
-            logging.warn("Scan {} have np.eye(4) affine, check the header".format(scan_name))
+            logging.warn(
+                "Scan {} have np.eye(4) affine, check the header".format(scan_name)
+            )
         if (labelf.affine == np.eye(4)).all():
-            logging.warn("Label {} have np.eye(4) affine, check the header".format(scan_name))
+            logging.warn(
+                "Label {} have np.eye(4) affine, check the header".format(scan_name)
+            )
         if not (labelf.header["dim"] == scanf.header["dim"]).all():
             logging.error(
                 "Label and scan dimension mismatch for {}, scan is {}, label is {}".format(
@@ -375,7 +453,9 @@ class Polygon:
         """
         # print("___", np.min(self.points, axis=0))
         # print("---", np.max(self.points, axis=0))
-        self.center = list((np.min(self.points, axis=0) + np.max(self.points, axis=0)) / 2)
+        self.center = list(
+            (np.min(self.points, axis=0) + np.max(self.points, axis=0)) / 2
+        )
         # print(self.center)
         # input("here")
         self.points.sort()
@@ -393,7 +473,9 @@ class Polygon:
         """
 
         def cmp(a):
-            return math.atan((a[1] - self.base[1]) / (a[0] - self.base[0] + self.epsilon))
+            return math.atan(
+                (a[1] - self.base[1]) / (a[0] - self.base[0] + self.epsilon)
+            )
 
         self.points.sort(key=cmp, reverse=True)
 
@@ -461,7 +543,10 @@ class Polygon:
             res = np.dot(matrix, p)
             return [float(res[0]), float(res[1])]
 
-        self.points = [[p[0] - self.base[0], p[1] - self.base[1], p[2] - self.base[2]] for p in self.points]
+        self.points = [
+            [p[0] - self.base[0], p[1] - self.base[1], p[2] - self.base[2]]
+            for p in self.points
+        ]
         # print("+_+", self.center)
         self.center = [b - a for a, b in zip(self.base, self.center)]
         self.center = rot_to_horizontal(self.center)
@@ -497,7 +582,9 @@ class Polygon:
         # self.plot_2d()
         center = self.center
         diameters = [self.height]
-        for alpha in np.arange(ang_range[0], ang_range[1], (ang_range[1] - ang_range[0]) / split):
+        for alpha in np.arange(
+            ang_range[0], ang_range[1], (ang_range[1] - ang_range[0]) / split
+        ):
             # TODO: 如果这个线是垂直的
             if alpha == np.pi / 2:
                 continue
