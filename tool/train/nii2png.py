@@ -16,10 +16,12 @@ parser.add_argument("--scan_dir", type=str, required=True)
 parser.add_argument("--scan_img_dir", type=str, required=True)
 parser.add_argument("--label_dir", type=str, default=None)
 parser.add_argument("--label_img_dir", type=str, default=None)
-parser.add_argument("--thresh", type=int, default=None)
+parser.add_argument("-t", "--thresh", type=int, default=None)
 parser.add_argument("--ww", type=int, default=1000)
 parser.add_argument("--wc", type=int, default=0)
-parser.add_argument("--rot", type=int, default=0)
+parser.add_argument("-r", "--rot", type=int, default=0)
+parser.add_argument("-f", "--front", type=int, default=None)
+parser.add_argument("-fm", "--front_mode", type=int, default=None)
 
 
 args = parser.parse_args()
@@ -47,4 +49,6 @@ for scan, label in zip(scans, labels):
         rot=args.rot,
         wwwc=[args.ww, args.wc],
         thresh=args.thresh,
+        front=args.front,
+        front_mode=args.front_mode,
     )

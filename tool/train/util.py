@@ -85,6 +85,8 @@ def nii2png(
     rot=0,
     wwwc=(400, 0),
     thresh=None,
+    front=None,
+    front_mode=None,
 ):
     """将nii格式的扫描转成png.
     扫描和标签一起处理，支持窗口化，旋转，略过没有前景的片
@@ -105,7 +107,12 @@ def nii2png(
         进行窗口化的窗宽窗位.
     thresh : int
         标签中前景数量达到这个数才生成png，否则略过.
-
+    front: int
+        标签中只保留0和clip两个值
+    front_mode: str
+        - stack:比front小的变成0,比front大的变成front。适合脏器+内部肿瘤这种包含的情况
+        - mono:只保留front，其他的都变成0。适合多种脏器的情况
+        - None:不进行处理
     Returns
     -------
     type
@@ -126,17 +133,21 @@ def nii2png(
     if label_path:
         labelf = nib.load(label_path)
         label_data = labelf.get_fdata()
+        if front_mode is not None:
+            if front_mode == "stack":
+                label_data[label_data < front] = 0
+                label_data[label_data >= front] = 1
+            if front_mode == "mono":
+                label_data[label_data != front] = 0
+                label_data[label_data != 0] = 1
         s = label_data.shape
         if s[1] == s[2]:
             label_data = np.swapaxes(label_data, 0, 2)
-        # TODO: assert
-        if label_data.shape != scan_data.shape:
-            print(
-                "[ERROR] Scan and image dimension mismatch",
-                name,
-                scan_data.shape,
-                label_data.shape,
-            )
+        assert (
+            label_data.shape == scan_data.shape
+        ), "[ERROR] Patient {} scan and image dimension mismatch, scan is {}, label is {}".format(
+            name, scan_data.shape, label_data.shape
+        )
 
     for _ in range(rot):
         scan_data = np.rot90(scan_data)
