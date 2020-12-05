@@ -13,14 +13,21 @@
 - train.py 训练网络
 - infer.py 用训练完的模型进行推理
 - vis.py 对数据进行可视化
-- eval.py 对分割结果进行评估
+- eval.py 对分割结果进行评估，支持基本所有医学影像常用2d/3d metric
 
 #### tool 工具脚本
-
-- merge.py 将针对同一个数据的多个前景分割结果进行融合
-- thresh_search.py 利用验证集搜索最合适的结果划分阈值
-- vote.py 利用投票的方式进行多个分割结果的融合
-- zip_dataset.py 对数据集进行分包压缩，满足每个包不超过一定大小，解压后可以还原目录结构
+tool中提供了一些实用的工具脚本，[train](./train)目录下主要用于训练前的预处理，[infer](./infer)目录下的主要用于推理和后处理。
+- dcm2nii.py 将dcm格式转换为nii格式
+- folder_split.py 将两个文件夹的训练文件夹随机分成训练/测试/验证集
+- mhd2nii.py 将mhd格式数据转换成nii格式
+- nii2png.py 将nii格式数据转换成png
+- to_512.py 将所有数据插值到512×512大小
+- flood_fill.py 用漫水法填满分割标签
+- to_pinyin.py 将所有文件名由中文转拼音
+- zip_dataset.py 将一个文件夹压缩，压缩包不超过指定大小
+- 2d_diameter.py 在2d平面内，以平行线夹的方式测量血管管径
+- merge.py 将多种前景的分割结果合并进一个文件
+- vote.py 用投票法对结果进行合并
 
 #### config 配置文件
 所有配置参考[config.py](https://github.com/davidlinhl/medSeg/blob/master/medseg/utils/config.py)

@@ -21,7 +21,7 @@ parser.add_argument("--ww", type=int, default=1000)
 parser.add_argument("--wc", type=int, default=0)
 parser.add_argument("-r", "--rot", type=int, default=0)
 parser.add_argument("-f", "--front", type=int, default=None)
-parser.add_argument("-fm", "--front_mode", type=int, default=None)
+parser.add_argument("-fm", "--front_mode", type=str, default=None)
 
 
 args = parser.parse_args()
