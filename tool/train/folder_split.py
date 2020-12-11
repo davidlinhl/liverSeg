@@ -5,9 +5,9 @@ import argparse
 # shutil.move("/home/lin/Desktop/a/test", "/home/lin/Desktop/b")  # 递归移动
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--base_dir", type=str, default="/home/lin/Desktop/data/aorta/dataset/")
-parser.add_argument("--img_folder", type=str, default="/home/lin/Desktop/data/aorta/dataset/scan/")
-parser.add_argument("--lab_folder", type=str, default="/home/lin/Desktop/data/aorta/dataset/label/")
+parser.add_argument("--base_dir", type=str, required=True)
+parser.add_argument("--img_folder", type=str, required=True)
+parser.add_argument("--lab_folder", type=str, required=True)
 args = parser.parse_args()
 
 
@@ -58,7 +58,9 @@ for part in range(3):
     print("Moving to folder {}".format(sub_folders[part]))
     for ind in range(split[part], split[part + 1]):
         print(img_names[ind], lab_names[ind])
-        assert img_names[ind] == lab_names[ind], "图片和标签名字对不上{}, {}".format(img_names[ind], lab_names[ind])
+        assert img_names[ind] == lab_names[ind], "图片和标签名字对不上{}, {}".format(
+            img_names[ind], lab_names[ind]
+        )
         mv(
             os.path.join(img_folder, img_names[ind]),
             os.path.join(base_dir, folders[0], sub_folders[part], img_names[ind]),

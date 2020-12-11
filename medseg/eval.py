@@ -43,6 +43,9 @@ def main():
         "Kappa",
         "Dice",
         "IOU",
+        # 3D
+        "Assd",
+        "Ravd",
     ]
     for m in metrics:
         if m in cfg.EVAL.METRICS:
@@ -59,7 +62,6 @@ def main():
     # BUG: pbar一直另起一行
     pbar = tqdm(total=len(preds), desc="评测进度")
     for ind in range(len(preds)):
-        pbar.update()
         pbar.set_postfix(file=preds[ind])
         predf = nib.load(os.path.join(cfg.EVAL.PATH.SEG, preds[ind]))
         # TODO: 改回labels
@@ -70,12 +72,16 @@ def main():
         if lab.shape[0] != pred.shape[0]:
             ratio = [a / b for a, b in zip(pred.shape, lab.shape)]
             lab = scipy.ndimage.interpolation.zoom(lab, ratio, order=1)
-        assert pred.shape == lab.shape, "分割结果和GT大小不同： {}，{}, {}".format(pred.shape, lab.shape, preds[ind])
+        assert pred.shape == lab.shape, "分割结果和GT大小不同： {}，{}, {}".format(
+            pred.shape, lab.shape, preds[ind]
+        )
 
         temp = []
 
         if "FP" in cfg.EVAL.METRICS:
-            pass
+            fp = metric.binary.obj_fpr(pred, lab)
+            temp.append(tp)
+
         if "FN" in cfg.EVAL.METRICS:
             pass
 
@@ -120,7 +126,16 @@ def main():
             iou = metric.binary.jc(pred, lab)
             temp.append(iou)
 
+        if "Assd" in cfg.EVAL.METRICS:
+            assd = metric.binary.assd(pred, lab)
+            temp.append(assd)
+
+        if "Ravd" in cfg.EVAL.METRICS:
+            ravd = metric.binary.ravd(pred, lab)
+            temp.append(ravd)
+
         res.append(temp)
+        pbar.update()
 
     f = open(cfg.EVAL.PATH.RESULT + "-" + str(datetime.now()) + ".csv", "w")
     print("文件", end=",", file=f)

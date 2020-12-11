@@ -1,7 +1,7 @@
 EVAL:
   PATH:
-    SEG: "/home/lin/Desktop/git/med/med_lib/nii_inf/seg/"
-    GT: "/home/lin/Desktop/data/aorta/nii/label/"
+    SEG: "/data/test/label/"
+    GT: "/data/test/gt/"
     RESULT: "./eval.csv"
   METRICS: [
       "IOU",
@@ -13,4 +13,9 @@ EVAL:
       "Sensitivity",
       "Specificity",
       "Accuracy",
+      "Kappa",
+      "Dice",
+      "IOU",
+      "Assd",
+      "Ravd",
     ]

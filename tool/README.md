@@ -63,7 +63,7 @@ pid6=$!
 pid8=$!
 
 # 计数
-count=`expr $count + 1`;
+count=`expr $count + 1`;胡金萍_20201024230539946.nii.gz
 echo $count / `ls -l | wc -l`;
 echo ${f};
 echo -e "\n";

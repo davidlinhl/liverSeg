@@ -22,21 +22,24 @@ parser.add_argument("--wc", type=int, default=0)
 parser.add_argument("-r", "--rot", type=int, default=0)
 parser.add_argument("-f", "--front", type=int, default=None)
 parser.add_argument("-fm", "--front_mode", type=str, default=None)
+parser.add_argument("-c", "--check", type=bool, default=False)
+parser.add_argument("--remove", type=bool, default=False)
 
 
 args = parser.parse_args()
 
 # TODO: 完善对扫描和标签的检查
-# util.check_nii_match(args.scan_dir, args.label_dir)
+if args.check:
+    util.check_nii_match(args.scan_dir, args.label_dir, remove=args.remove)
 
 # TODO: 添加logging
 scans = util.listdir(args.scan_dir)
 labels = util.listdir(args.label_dir)
 for s, l in zip(scans, labels):
     print(s, "\t", l)
-cmd = input("Input Y/y to continue: ")
-if cmd.lower() != "y":
-    exit("exit on user cmd")
+# cmd = input("Input Y/y to continue: ")
+# if cmd.lower() != "y":
+#     exit("exit on user cmd")
 scans = tqdm(scans)
 for scan, label in zip(scans, labels):
     scans.set_description("Processing {}".format(scan.rstrip(".gz").rstrip(".nii")))
