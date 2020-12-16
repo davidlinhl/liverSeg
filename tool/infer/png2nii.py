@@ -43,6 +43,8 @@ def main():
             print(n, "dont have mask")
     print(patient_names)
     input("Press enter to continue")
+    if not os.path.exists(args.seg_dir):
+        os.makedirs(args.seg_dir)  # TODO: recursive makedir
 
     pbar = tqdm(patient_names)
     executor = concurrent.futures.ThreadPoolExecutor(
@@ -57,8 +59,7 @@ def main():
         patient_imgs = [
             n
             for n in img_names
-            if n.split("-")[0] == patient.rstrip(".gz").rstrip(".nii")
-            and n.endswith("mask.png")
+            if n.split("-")[0] == patient.split(".")[0] and n.endswith("mask.png")
         ]
         patient_imgs.sort(key=lambda n: int(n.split("-")[1].split("_")[0]))
         print(patient, patient_imgs, len(patient_imgs))
@@ -69,7 +70,7 @@ def main():
             scanf = nib.load(os.path.join(args.scan_dir, patient))
             scan_header = scanf.header
         except:
-            print(patient, "error")
+            print("!!!!!!!", patient, "error")
             continue
             # scanf = nib.load(os.path.join(args.scan_dir, "张金华_20201024213424575a.nii"))
             # scan_header = scanf.header
@@ -79,7 +80,7 @@ def main():
             ind = int(img_name.split("-")[1].split("_")[0])
             # img = img.swapaxes(0, 1)
             if "\u4e00" <= patient[0] <= "\u9fff":
-                img = img[:, ::-1, 0]
+                img = img[:, :, 0]
             elif len(patient) > 5:
                 img = img[:, :, 0]
             else:

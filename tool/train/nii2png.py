@@ -2,7 +2,6 @@
 """
 1. 所有的nii和标签转成png
 2. 按照paddleseg的目录结构移动文件
-# TODO:  3. 生成list文件
 """
 import os
 import argparse
@@ -28,7 +27,7 @@ parser.add_argument("--remove", type=bool, default=False)
 
 args = parser.parse_args()
 
-# TODO: 完善对扫描和标签的检查
+# CHECK: 完善对扫描和标签的检查
 if args.check:
     util.check_nii_match(args.scan_dir, args.label_dir, remove=args.remove)
 
@@ -38,9 +37,12 @@ if args.label_dir is not None:
     labels = util.listdir(args.label_dir)
     for s, l in zip(scans, labels):
         print(s, "\t", l)
-# cmd = input("Input Y/y to continue: ")
-# if cmd.lower() != "y":
-#     exit("exit on user cmd")
+
+# TODO: 输出基本信息
+cmd = input("Input Y/y to continue: ")
+if cmd.lower() != "y":
+    exit("exit on user cmd")
+
 scans = tqdm(scans)
 # TODO: 两种情况合并，删掉这个if
 if args.label_dir is not None:
@@ -58,6 +60,7 @@ if args.label_dir is not None:
             front_mode=args.front_mode,
         )
 else:
+    # TODO: 对第一片和最后一片复制ｎ层，不要直接跳过
     for scan in scans:
         scans.set_description("Processing {}".format(scan.rstrip(".gz").rstrip(".nii")))
         util.nii2png(

@@ -76,7 +76,7 @@ def filter_largest_volume(label, ratio=1.2, mode="soft"):
 
 labels = []
 
-# TODO: 添加clip到一个前景类型的功能
+# CHECK: 添加clip到一个前景类型的功能
 def nii2png(
     scan_path,
     scan_img_dir,
@@ -175,20 +175,20 @@ def nii2png(
                     continue
                 file_path = os.path.join(
                     label_img_dir,
-                    "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind),
+                    "{}-{}.png".format(name.split(".")[0], ind),
                 )
                 executor.submit(save_png, label_slice, file_path)
 
             scan_slice = scan_data[:, :, ind - 1 : ind + 2]
             file_path = os.path.join(
-                scan_img_dir, "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind)
+                scan_img_dir, "{}-{}.png".format(name.split(".")[0], ind)
             )
             executor.submit(save_png, scan_slice, file_path)
             if label_path:
                 label_slice = label_data[:, :, ind]
                 file_path = os.path.join(
                     label_img_dir,
-                    "{}-{}.png".format(name.rstrip(".gz").rstrip(".nii"), ind),
+                    "{}-{}.png".format(name.split(".")[0], ind),
                 )
                 executor.submit(save_png, label_slice, file_path)
 
