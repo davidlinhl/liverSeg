@@ -1,8 +1,8 @@
 EVAL:
   PATH:
-    SEG: "/data/test/label/"
-    GT: "/data/test/gt/"
-    RESULT: "./eval.csv"
+    SEG: "/data/aorta/300/label/nii/aunet-best"
+    GT: "/data/aorta/300/test/label"
+    NAME: "aunet-best"
   METRICS: [
       "IOU",
       "Dice",
@@ -13,7 +13,6 @@ EVAL:
       "Sensitivity",
       "Specificity",
       "Accuracy",
-      "Kappa",
       "Dice",
       "IOU",
       "Assd",

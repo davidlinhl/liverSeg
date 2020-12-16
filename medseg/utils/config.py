@@ -35,7 +35,9 @@ class PjConfig(dict):
     def __setitem__(self, key, value):
         if self.immutable:
             raise AttributeError(
-                'Attempted to set "{}" to "{}", but PjConfig is immutable'.format(key, value)
+                'Attempted to set "{}" to "{}", but PjConfig is immutable'.format(
+                    key, value
+                )
             )
         if isinstance(value, six.string_types):
             try:
@@ -68,7 +70,9 @@ class PjConfig(dict):
     def update_from_list(self, config_list):
         if len(config_list) % 2 != 0:
             raise ValueError(
-                "Command line options config format error! Please check it: {}".format(config_list)
+                "Command line options config format error! Please check it: {}".format(
+                    config_list
+                )
             )
         for key, value in zip(config_list[0::2], config_list[1::2]):
             try:
@@ -242,7 +246,7 @@ cfg.EVAL.PATH.SEG = "/home/aistudio/data/infer_lab"
 # 分割GT标签的路径
 cfg.EVAL.PATH.GT = "/home/aistudio/data/eval_lab"
 # 评估结果存储的文件
-cfg.EVAL.PATH.RESULT = "./eval/lits"
+cfg.EVAL.PATH.NAME = "eval"
 # 测试过程中要计算的指标，包括
 # FP，FN，TP，TN(绝对数量)
 # Precision,Recall/Sensitivity,Specificity,Accuracy,Kappa
