@@ -130,7 +130,7 @@ def nii2png(
         print("[WARNNING]", name, "is 1024")
         # vol = scipy.ndimage.interpolation.zoom(vol, [0.5, 0.5, 1], order=1 if islabel else 3)
 
-    if label_path:
+    if label_path is not None:
         labelf = nib.load(label_path)
         label_data = labelf.get_fdata()
         if front_mode is not None:

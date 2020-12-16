@@ -34,24 +34,36 @@ if args.check:
 
 # TODO: 添加logging
 scans = util.listdir(args.scan_dir)
-labels = util.listdir(args.label_dir)
-for s, l in zip(scans, labels):
-    print(s, "\t", l)
+if args.label_dir is not None:
+    labels = util.listdir(args.label_dir)
+    for s, l in zip(scans, labels):
+        print(s, "\t", l)
 # cmd = input("Input Y/y to continue: ")
 # if cmd.lower() != "y":
 #     exit("exit on user cmd")
 scans = tqdm(scans)
-for scan, label in zip(scans, labels):
-    scans.set_description("Processing {}".format(scan.rstrip(".gz").rstrip(".nii")))
-
-    util.nii2png(
-        os.path.join(args.scan_dir, scan),
-        args.scan_img_dir,
-        os.path.join(args.label_dir, label) if args.label_dir else None,
-        args.label_img_dir,
-        rot=args.rot,
-        wwwc=[args.ww, args.wc],
-        thresh=args.thresh,
-        front=args.front,
-        front_mode=args.front_mode,
-    )
+# TODO: 两种情况合并，删掉这个if
+if args.label_dir is not None:
+    for scan, label in zip(scans, labels):
+        scans.set_description("Processing {}".format(scan.rstrip(".gz").rstrip(".nii")))
+        util.nii2png(
+            os.path.join(args.scan_dir, scan),
+            args.scan_img_dir,
+            os.path.join(args.label_dir, label) if args.label_dir else None,
+            args.label_img_dir,
+            rot=args.rot,
+            wwwc=[args.ww, args.wc],
+            thresh=args.thresh,
+            front=args.front,
+            front_mode=args.front_mode,
+        )
+else:
+    for scan in scans:
+        scans.set_description("Processing {}".format(scan.rstrip(".gz").rstrip(".nii")))
+        util.nii2png(
+            os.path.join(args.scan_dir, scan),
+            args.scan_img_dir,
+            rot=args.rot,
+            wwwc=[args.ww, args.wc],
+            thresh=args.thresh,
+        )

@@ -45,7 +45,9 @@ def main():
     input("Press enter to continue")
 
     pbar = tqdm(patient_names)
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count())
+    executor = concurrent.futures.ThreadPoolExecutor(
+        max_workers=multiprocessing.cpu_count()
+    )
     for patient in pbar:
         pbar.set_description(patient)
         if os.path.exists(os.path.join(args.seg_dir, patient)):
@@ -53,7 +55,10 @@ def main():
             continue
 
         patient_imgs = [
-            n for n in img_names if n.split("-")[0] == patient.rstrip(".gz").rstrip(".nii") and n.endswith("mask.png")
+            n
+            for n in img_names
+            if n.split("-")[0] == patient.rstrip(".gz").rstrip(".nii")
+            and n.endswith("mask.png")
         ]
         patient_imgs.sort(key=lambda n: int(n.split("-")[1].split("_")[0]))
         print(patient, patient_imgs, len(patient_imgs))
@@ -72,13 +77,13 @@ def main():
         for img_name in patient_imgs:
             img = cv2.imread(os.path.join(args.png_dir, img_name))
             ind = int(img_name.split("-")[1].split("_")[0])
-            img = img.swapaxes(0, 1)
+            # img = img.swapaxes(0, 1)
             if "\u4e00" <= patient[0] <= "\u9fff":
                 img = img[:, ::-1, 0]
             elif len(patient) > 5:
-                img = img[:, ::-1, 0]
+                img = img[:, :, 0]
             else:
-                img = img[::-1, ::, 0]
+                img = img[:, :, 0]
             img_data[:, :, ind] = img
 
         img_data[:, :, -1] = img_data[:, :, -2]
