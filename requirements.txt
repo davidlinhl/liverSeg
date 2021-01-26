@@ -7,3 +7,4 @@ medpy
 pypinyin
 trimesh
 SimpleITK
+paddleseg
